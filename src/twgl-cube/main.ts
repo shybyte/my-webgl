@@ -114,9 +114,6 @@ function render(time: number) {
   time *= 0.001;
   twgl.resizeCanvasToDisplaySize(gl.canvas);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-  gl.enable(gl.DEPTH_TEST);
-  gl.enable(gl.CULL_FACE);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   const fov = (30 * Math.PI) / 180;
@@ -138,11 +135,15 @@ function render(time: number) {
   uniforms.u_worldInverseTranspose = m4.transpose(m4.inverse(world));
   uniforms.u_worldViewProjection = m4.multiply(viewProjection, world);
 
+  gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.CULL_FACE);
   gl.useProgram(programInfo.program);
   twgl.setBuffersAndAttributes(gl, programInfo, bufferInfo);
+
   twgl.setUniforms(programInfo, uniforms);
   gl.drawElements(gl.TRIANGLES, bufferInfo.numElements, gl.UNSIGNED_SHORT, 0);
 
   requestAnimationFrame(render);
 }
+
 requestAnimationFrame(render);
