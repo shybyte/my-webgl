@@ -114,7 +114,6 @@ export function main() {
   };
 
   const modelMatrix = mat4.create();
-  mat4.translate(modelMatrix, modelMatrix, [0, 0, 0]);
 
   const projectionMatrix = mat4.create();
   mat4.perspective(
@@ -125,10 +124,8 @@ export function main() {
     1e4, // far cull distance
   );
 
-  const viewMatrix = mat4.create();
-  mat4.translate(viewMatrix, viewMatrix, [0, 0, 2]);
-  mat4.invert(viewMatrix, viewMatrix);
-
+  const camera = mat4.lookAt(mat4.create(), [0, 0, -2], [0, 0, 0], [0, 1, 0]);
+  const viewMatrix = mat4.invert(mat4.create(), camera);
   const mvMatrix = mat4.create();
   const finalMatrix = mat4.create();
 
