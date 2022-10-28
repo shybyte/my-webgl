@@ -8,7 +8,7 @@ import {
   setupCanvas,
 } from '../my-utils';
 
-const CUBE_COUNT = 100_000;
+const CUBE_COUNT = 1_000;
 
 export function main() {
   console.log('Starting main...');
@@ -64,15 +64,9 @@ export function main() {
     0.5, -.5, -.5,
   ];
 
-  const vertexData = [];
-
+  const offsetData = [];
   for (let i = 0; i < CUBE_COUNT; i++) {
-    vertexData.push(
-      ...moveVertexData(
-        [...vertexDataCube],
-        [(Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20],
-      ),
-    );
+    offsetData.push((Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20);
   }
 
   const colorDataCube = [];
@@ -88,7 +82,8 @@ export function main() {
     colorData.push(...colorDataCube);
   }
 
-  const positionBuffer = createMyBuffer(gl, vertexData);
+  const positionBuffer = createMyBuffer(gl, vertexDataCube);
+  const offsetBuffer = createMyBuffer(gl, offsetData);
   const colorBuffer = createMyBuffer(gl, colorData);
 
   // language=glsl
@@ -99,13 +94,14 @@ export function main() {
 
     in vec3 position;
     in vec3 color;
+    in vec3 aOffset;
     out vec3 vColor;
 
     uniform mat4 matrix;
 
     void main() {
       vColor = color;
-      gl_Position = matrix * vec4(position, 1);
+      gl_Position = matrix * vec4(position + aOffset, 1);
     }
     `,
     `#version 300 es
@@ -125,7 +121,10 @@ export function main() {
   gl.enable(gl.DEPTH_TEST);
 
   setProgramAttributeToMyBuffer(gl, program, 'position', positionBuffer);
+  setProgramAttributeToMyBuffer(gl, program, 'aOffset', offsetBuffer);
   setProgramAttributeToMyBuffer(gl, program, 'color', colorBuffer);
+  const offsetLocation = gl.getAttribLocation(program, 'aOffset');
+  gl.vertexAttribDivisor(offsetLocation, 1);
 
   const uniformLocations = {
     matrix: gl.getUniformLocation(program, 'matrix'),
@@ -161,17 +160,10 @@ export function main() {
     mat4.multiply(finalMatrix, projectionMatrix, mvMatrix);
     gl.uniformMatrix4fv(uniformLocations.matrix, false, finalMatrix);
 
-    gl.drawArrays(gl.TRIANGLES, 0, positionBuffer.length);
+    gl.drawArraysInstanced(gl.TRIANGLES, 0, positionBuffer.length, CUBE_COUNT);
   });
 
   console.log('Starting main finished.');
-}
-
-function moveVertexData(data: number[], vec3: [number, number, number]): number[] {
-  for (let i = 0; i < data.length; i++) {
-    data[i] = data[i] + vec3[i % 3];
-  }
-  return data;
 }
 
 main();
