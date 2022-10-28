@@ -8,42 +8,44 @@ import {
   setupCanvas,
 } from '../my-utils';
 
+const CUBE_COUNT = 1_000;
+
 export function main() {
   console.log('Starting main...');
   const { infoDisplayElement, gl, canvas } = setupCanvas();
 
   // prettier-ignore
-  const vertexData = [
+  const vertexDataCube = [
     // Front
     0.5, 0.5, 0.5, // top right
-    0.5, -.5, 0.5, // bottom right
-    -.5, 0.5, 0.5, // top left
     -.5, 0.5, 0.5, // top left
     0.5, -.5, 0.5, // bottom right
+    -.5, 0.5, 0.5, // top left
     -.5, -.5, 0.5, // bottom left
+    0.5, -.5, 0.5, // bottom right
 
     // Left
     -.5, 0.5, 0.5,
-    -.5, -.5, 0.5,
-    -.5, 0.5, -.5,
     -.5, 0.5, -.5,
     -.5, -.5, 0.5,
+    -.5, 0.5, -.5,
     -.5, -.5, -.5,
+    -.5, -.5, 0.5,
 
     // Back
     -.5, 0.5, -.5,
-    -.5, -.5, -.5,
-    0.5, 0.5, -.5,
     0.5, 0.5, -.5,
     -.5, -.5, -.5,
+    0.5, 0.5, -.5,
     0.5, -.5, -.5,
+    -.5, -.5, -.5,
 
     0.5, 0.5, -.5,
+    0.5, 0.5, 0.5,
     0.5, -.5, -.5,
     0.5, 0.5, 0.5,
-    0.5, 0.5, 0.5,
-    0.5, -.5, -0.5,
     0.5, -.5, 0.5,
+    0.5, -.5, -0.5,
 
     // Top
     0.5, 0.5, 0.5,
@@ -55,19 +57,35 @@ export function main() {
 
     // Underside
     0.5, -.5, 0.5,
-    0.5, -.5, -.5,
-    -.5, -.5, 0.5,
     -.5, -.5, 0.5,
     0.5, -.5, -.5,
+    -.5, -.5, 0.5,
     -.5, -.5, -.5,
+    0.5, -.5, -.5,
   ];
 
-  const colorData = [];
+  const vertexData = [];
+
+  for (let i = 0; i < CUBE_COUNT; i++) {
+    vertexData.push(
+      ...moveVertexData(
+        [...vertexDataCube],
+        [(Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20],
+      ),
+    );
+  }
+
+  const colorDataCube = [];
   for (let face = 0; face < 6; face++) {
     let faceColor = randomColor();
     for (let vertex = 0; vertex < 6; vertex++) {
-      colorData.push(...faceColor);
+      colorDataCube.push(...faceColor);
     }
+  }
+
+  const colorData = [];
+  for (let i = 0; i < CUBE_COUNT; i++) {
+    colorData.push(...colorDataCube);
   }
 
   const positionBuffer = createMyBuffer(gl, vertexData);
@@ -124,10 +142,11 @@ export function main() {
     1e4, // far cull distance
   );
 
-  const camera = mat4.lookAt(mat4.create(), [0, 0, -2], [0, 0, 0], [0, 1, 0]);
-  const viewMatrix = mat4.invert(mat4.create(), camera);
+  const viewMatrix = mat4.lookAt(mat4.create(), [0, 0, 30], [0, 0, 0], [0, 1, 0]);
   const mvMatrix = mat4.create();
   const finalMatrix = mat4.create();
+
+  gl.enable(gl.CULL_FACE);
 
   renderLoop((deltaTime, fps, frameCount) => {
     if (frameCount % 10 === 5) {
@@ -136,6 +155,7 @@ export function main() {
 
     mat4.rotateZ(modelMatrix, modelMatrix, 0.6 * deltaTime);
     mat4.rotateX(modelMatrix, modelMatrix, 0.7 * deltaTime);
+    mat4.rotateY(modelMatrix, modelMatrix, 0.7 * deltaTime);
 
     mat4.multiply(mvMatrix, viewMatrix, modelMatrix);
     mat4.multiply(finalMatrix, projectionMatrix, mvMatrix);
@@ -145,6 +165,13 @@ export function main() {
   });
 
   console.log('Starting main finished.');
+}
+
+function moveVertexData(data: number[], vec3: [number, number, number]): number[] {
+  for (let i = 0; i < data.length; i++) {
+    data[i] = data[i] + vec3[i % 3];
+  }
+  return data;
 }
 
 main();
