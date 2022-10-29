@@ -26,8 +26,7 @@ export function main() {
     );
   }
 
-  const colorData = [];
-  colorData.push(1, 0, 0);
+  const colorData = [1, 0, 0];
   for (let i = 0; i < CUBE_COUNT - 1; i++) {
     colorData.push(...randomColor());
   }
@@ -53,13 +52,10 @@ export function main() {
   gl.vertexAttribDivisor(colorLocation, 1);
 
   const uniformLocations = {
-    matrix: gl.getUniformLocation(program, 'matrix'),
     normalMatrix: gl.getUniformLocation(program, `normalMatrix`),
     projection: gl.getUniformLocation(program, 'projection'),
     modelview: gl.getUniformLocation(program, `modelview`),
   };
-
-  const modelMatrix = mat4.create();
 
   const projectionMatrix = mat4.create();
   mat4.perspective(
@@ -71,8 +67,9 @@ export function main() {
   );
 
   const viewMatrix = mat4.lookAt(mat4.create(), [0, 0, 2], [0, 0, 0], [0, 1, 0]);
+
+  const modelMatrix = mat4.create();
   const mvMatrix = mat4.create();
-  const finalMatrix = mat4.create();
   const normalMatrix = mat4.create();
 
   gl.enable(gl.CULL_FACE);
@@ -87,15 +84,11 @@ export function main() {
     mat4.rotateY(modelMatrix, modelMatrix, 0.8 * deltaTime);
 
     mat4.multiply(mvMatrix, viewMatrix, modelMatrix);
-
     mat4.invert(normalMatrix, mvMatrix);
     mat4.transpose(normalMatrix, normalMatrix);
 
-    mat4.multiply(finalMatrix, projectionMatrix, mvMatrix);
-
     gl.uniformMatrix4fv(uniformLocations.projection, false, projectionMatrix);
     gl.uniformMatrix4fv(uniformLocations.modelview, false, mvMatrix);
-    gl.uniformMatrix4fv(uniformLocations.matrix, false, finalMatrix);
     gl.uniformMatrix4fv(uniformLocations.normalMatrix, false, normalMatrix);
 
     gl.drawArraysInstanced(gl.TRIANGLES, 0, positionBuffer.length, CUBE_COUNT);
