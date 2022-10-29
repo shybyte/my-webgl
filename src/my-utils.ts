@@ -81,6 +81,9 @@ export function createBuffer(gl: WebGL2RenderingContext, data: number[]): WebGLB
 }
 
 export function createMyBuffer(gl: WebGL2RenderingContext, data: number[], size = 3): MyBuffer {
+  if (data.length % size !== 0) {
+    throw new Error('buffer length must be divisible by ' + size);
+  }
   return {
     size: size,
     length: data.length / size,
@@ -149,4 +152,11 @@ export function renderLoop(callback: (deltaTime: number, fps: number, frameCount
 
 export function randomColor() {
   return [Math.random(), Math.random(), Math.random()];
+}
+
+export function scaleVertexData(data: number[], vec3: [number, number, number]): number[] {
+  for (let i = 0; i < data.length; i++) {
+    data[i] = data[i] * vec3[i % 3];
+  }
+  return data;
 }
