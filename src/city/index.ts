@@ -1,6 +1,7 @@
 import { mat4 } from 'gl-matrix';
 import { renderLoop, setupCanvas } from '../my-utils';
 import { CheckerBoard } from './checker-board';
+import { Cubes } from './cubes';
 
 export function main() {
   console.log('Starting main...');
@@ -21,14 +22,17 @@ export function main() {
   const viewMatrix = mat4.lookAt(mat4.create(), [0, 1, 5], [0, 0, 0], [0, 1, 0]);
 
   const checkerBoard = new CheckerBoard(gl);
+  const cubes = new Cubes(gl);
 
   renderLoop((deltaTime, fps, frameCount) => {
     if (frameCount % 10 === 5) {
       infoDisplayElement.innerText = 'FPS: ' + fps;
     }
 
-    mat4.rotateY(viewMatrix, viewMatrix, 0.2 * deltaTime);
+    mat4.rotateY(viewMatrix, viewMatrix, 0.7 * deltaTime);
+
     checkerBoard.render(gl, viewMatrix, projectionMatrix);
+    cubes.render(gl, viewMatrix, projectionMatrix);
   });
 
   console.log('Starting main finished.');
