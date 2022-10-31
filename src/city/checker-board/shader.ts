@@ -1,5 +1,5 @@
 // language=glsl
-export const vertexShaderSrc = `#version 300 es
+export const CHECKER_BOARD_VERTEX_SHADER_SRC = `#version 300 es
 precision mediump float;
 
 in vec3 position;
@@ -25,7 +25,7 @@ void main() {
 `;
 
 // language=glsl
-export const fragmentShader = `#version 300 es
+export const CHECKER_BOARD_FRAGMENT_SHADER_SRC = `#version 300 es
 precision mediump float;
 
 in vec2 texCoord;

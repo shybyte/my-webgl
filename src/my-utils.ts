@@ -66,7 +66,7 @@ export function createProgram(
   return program;
 }
 
-interface MyBuffer {
+export interface MyBuffer {
   length: number;
   size: number;
   webglBuffer: WebGLBuffer;
