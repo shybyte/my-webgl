@@ -44,9 +44,6 @@ export class CheckerBoard {
 
     this.program = createProgram(gl, CHECKER_BOARD_VERTEX_SHADER_SRC, CHECKER_BOARD_FRAGMENT_SHADER_SRC);
 
-    setProgramAttributeToMyBuffer(gl, this.program, 'position', this.positionBuffer);
-    setProgramAttributeToMyBuffer(gl, this.program, 'normal', this.normalBuffer);
-
     this.uniformLocations = {
       normalMatrix: gl.getUniformLocation(this.program, `normalMatrix`)!,
       projection: gl.getUniformLocation(this.program, 'projection')!,
@@ -56,6 +53,9 @@ export class CheckerBoard {
 
   render(gl: WebGL2RenderingContext, viewMatrix: mat4, projectionMatrix: mat4) {
     gl.useProgram(this.program);
+
+    setProgramAttributeToMyBuffer(gl, this.program, 'position', this.positionBuffer);
+    setProgramAttributeToMyBuffer(gl, this.program, 'normal', this.normalBuffer);
 
     mat4.multiply(this.mvMatrix, viewMatrix, this.modelMatrix);
     mat4.invert(this.normalMatrix, this.mvMatrix);

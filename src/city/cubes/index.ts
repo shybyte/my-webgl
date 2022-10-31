@@ -1,9 +1,16 @@
-import { createMyBuffer, createProgram, MyBuffer, randomColor, setProgramAttributeToMyBuffer } from '../../my-utils';
+import {
+  createMyBuffer,
+  createProgram,
+  MyBuffer,
+  randomColor,
+  scaleVertexData,
+  setProgramAttributeToMyBuffer,
+} from '../../my-utils';
 import { mat4 } from 'gl-matrix';
 import { CUBE_FRAGMENT_SHADER_SRC, CUBE_VERTEX_SHADER_SRC } from './shader';
 import { cubeNormalData, cubeVertexData } from './cube';
 
-const CUBE_COUNT = 1;
+const CUBE_COUNT = 500;
 
 interface UniformLocations {
   normalMatrix: WebGLUniformLocation;
@@ -27,13 +34,9 @@ export class Cubes {
 
   constructor(gl: WebGL2RenderingContext) {
     const offsetData = [];
-    const cubeCloudSize = 0;
+    const cubeCloudSize = 5;
     for (let i = 0; i < CUBE_COUNT; i++) {
-      offsetData.push(
-        (Math.random() - 0.5) * cubeCloudSize,
-        (Math.random() - 0.5) * cubeCloudSize,
-        (Math.random() - 0.5) * cubeCloudSize,
-      );
+      offsetData.push((Math.random() - 0.5) * cubeCloudSize, 0.1, (Math.random() - 0.5) * cubeCloudSize);
     }
 
     const colorData = [1, 0, 0];
@@ -41,18 +44,13 @@ export class Cubes {
       colorData.push(...randomColor());
     }
 
-    this.positionBuffer = createMyBuffer(gl, cubeVertexData);
+    this.positionBuffer = createMyBuffer(gl, scaleVertexData([...cubeVertexData], [0.2, 0.2, 0.2]));
     this.normalBuffer = createMyBuffer(gl, cubeNormalData);
 
     this.offsetBuffer = createMyBuffer(gl, offsetData);
     this.colorBuffer = createMyBuffer(gl, colorData);
 
     this.program = createProgram(gl, CUBE_VERTEX_SHADER_SRC, CUBE_FRAGMENT_SHADER_SRC);
-
-    setProgramAttributeToMyBuffer(gl, this.program, 'position', this.positionBuffer);
-    setProgramAttributeToMyBuffer(gl, this.program, 'normal', this.normalBuffer);
-    setProgramAttributeToMyBuffer(gl, this.program, 'aOffset', this.offsetBuffer);
-    setProgramAttributeToMyBuffer(gl, this.program, 'color', this.colorBuffer);
 
     const offsetLocation = gl.getAttribLocation(this.program, 'aOffset');
     const colorLocation = gl.getAttribLocation(this.program, 'color');
@@ -69,15 +67,14 @@ export class Cubes {
   render(gl: WebGL2RenderingContext, viewMatrix: mat4, projectionMatrix: mat4) {
     gl.useProgram(this.program);
 
+    setProgramAttributeToMyBuffer(gl, this.program, 'position', this.positionBuffer);
+    setProgramAttributeToMyBuffer(gl, this.program, 'normal', this.normalBuffer);
+    setProgramAttributeToMyBuffer(gl, this.program, 'aOffset', this.offsetBuffer);
+    setProgramAttributeToMyBuffer(gl, this.program, 'color', this.colorBuffer);
+
     mat4.multiply(this.mvMatrix, viewMatrix, this.modelMatrix);
     mat4.invert(this.normalMatrix, this.mvMatrix);
     mat4.transpose(this.normalMatrix, this.normalMatrix);
-
-    this.uniformLocations = {
-      normalMatrix: gl.getUniformLocation(this.program, `normalMatrix`)!,
-      projection: gl.getUniformLocation(this.program, 'projection')!,
-      modelview: gl.getUniformLocation(this.program, `modelview`)!,
-    };
 
     gl.uniformMatrix4fv(this.uniformLocations.projection, false, projectionMatrix);
     gl.uniformMatrix4fv(this.uniformLocations.modelview, false, this.mvMatrix);
