@@ -19,7 +19,7 @@ export function main() {
     1e4, // far cull distance
   );
 
-  const viewMatrix = mat4.lookAt(mat4.create(), [0, 1, 5], [0, 0, 0], [0, 1, 0]);
+  const viewMatrix = mat4.lookAt(mat4.create(), [0, 2, 5], [0, 0, 0], [0, 1, 0]);
 
   const checkerBoard = new CheckerBoard(gl);
   const cubes = new Cubes(gl);

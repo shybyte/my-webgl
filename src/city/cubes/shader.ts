@@ -5,6 +5,7 @@ precision mediump float;
 in vec3 position;
 in vec3 color;
 in vec3 aOffset;
+in vec3 aScale;
 in vec3 normal;
 
 out vec3 vColor;
@@ -17,7 +18,7 @@ out vec3 vertPos;
 
 void main() {
   vColor = color;
-  vec4 vertPos4 = modelview * vec4(position + aOffset, 1.0);
+  vec4 vertPos4 = modelview * vec4(position * aScale + aOffset, 1.0);
   vertPos = vec3(vertPos4) / vertPos4.w;
   normalInterp = vec3(normalMatrix * vec4(normal, 0.0));
   gl_Position = projection * vertPos4;
@@ -44,7 +45,7 @@ const vec3 lightPos = vec3(0.0, 10.0, 0.0);// Light position
 out vec4 finalColor;
 
 void main() {
-  vec3 ambientColor = 0.1 * vColor;
+  vec3 ambientColor = 0.2 * vColor;
   vec3 diffuseColor = vColor;
   
   vec3 N = normalize(normalInterp);
