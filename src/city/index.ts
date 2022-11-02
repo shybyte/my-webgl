@@ -2,6 +2,7 @@ import { mat4 } from 'gl-matrix';
 import { renderLoop, setupCanvas } from '../my-utils';
 import { CheckerBoard } from './checker-board';
 import { Cubes } from './cubes';
+import { MouseController } from './mouse-controller';
 
 export function main() {
   console.log('Starting main...');
@@ -20,19 +21,24 @@ export function main() {
   );
 
   const viewMatrix = mat4.lookAt(mat4.create(), [0, 2, 5], [0, 0, 0], [0, 1, 0]);
+  const viewMatrixRotated = mat4.create();
 
   const checkerBoard = new CheckerBoard(gl);
   const cubes = new Cubes(gl);
+  const mouseController = new MouseController(canvas);
 
-  renderLoop((deltaTime, fps, frameCount) => {
+  renderLoop((_deltaTime, fps, frameCount) => {
     if (frameCount % 10 === 5) {
       infoDisplayElement.innerText = 'FPS: ' + fps;
     }
 
-    mat4.rotateY(viewMatrix, viewMatrix, 0.7 * deltaTime);
+    mouseController.onRenderLoop();
 
-    checkerBoard.render(gl, viewMatrix, projectionMatrix);
-    cubes.render(gl, viewMatrix, projectionMatrix);
+    mat4.rotateX(viewMatrixRotated, viewMatrix, mouseController.phi);
+    mat4.rotateY(viewMatrixRotated, viewMatrixRotated, mouseController.theta);
+
+    checkerBoard.render(gl, viewMatrixRotated, projectionMatrix);
+    cubes.render(gl, viewMatrixRotated, projectionMatrix);
   });
 
   console.log('Starting main finished.');

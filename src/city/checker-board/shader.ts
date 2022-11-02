@@ -48,8 +48,8 @@ void main() {
   float fmodResult = mod(floor(checkSize * texCoord.x) + floor(checkSize * texCoord.y), 2.0);
   float checkerBoardOnOff = max(sign(fmodResult), 0.0);
 
-  vec3 ambientColor = 0.1 * vColor * checkerBoardOnOff;
-  vec3 diffuseColor = vColor * checkerBoardOnOff;
+  vec3 ambientColor = 0.4 * vColor * checkerBoardOnOff;
+  vec3 diffuseColor = 0.6 * vColor * checkerBoardOnOff;
 
   vec3 N = normalize(normalInterp);
   vec3 L = normalize(lightPos - vertPos);
