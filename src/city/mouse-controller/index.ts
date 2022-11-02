@@ -31,7 +31,6 @@ export class MouseController {
       this.#phi += this.dY;
       x_prev = e.pageX;
       y_prev = e.pageY;
-      console.log('THETA:', this.#theta, this.#phi);
       e.preventDefault();
     };
 
