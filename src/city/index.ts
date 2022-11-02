@@ -3,6 +3,7 @@ import { renderLoop, setupCanvas } from '../my-utils';
 import { CheckerBoard } from './checker-board';
 import { Cubes } from './cubes';
 import { MouseController } from './mouse-controller';
+import { Skybox } from './skybox';
 
 export function main() {
   console.log('Starting main...');
@@ -26,6 +27,7 @@ export function main() {
   const checkerBoard = new CheckerBoard(gl);
   const cubes = new Cubes(gl);
   const mouseController = new MouseController(canvas);
+  const skybox = new Skybox(gl);
 
   renderLoop((_deltaTime, fps, frameCount) => {
     if (frameCount % 10 === 5) {
@@ -39,6 +41,7 @@ export function main() {
 
     checkerBoard.render(gl, viewMatrixRotated, projectionMatrix);
     cubes.render(gl, viewMatrixRotated, projectionMatrix);
+    skybox.render(gl, viewMatrixRotated, projectionMatrix, mouseController.theta, mouseController.phi);
   });
 
   console.log('Starting main finished.');
