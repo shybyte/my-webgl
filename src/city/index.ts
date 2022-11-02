@@ -41,7 +41,7 @@ export function main() {
 
     checkerBoard.render(gl, viewMatrixRotated, projectionMatrix);
     cubes.render(gl, viewMatrixRotated, projectionMatrix);
-    skybox.render(gl, viewMatrixRotated, projectionMatrix, mouseController.theta, mouseController.phi);
+    skybox.render(gl, viewMatrixRotated, projectionMatrix);
   });
 
   console.log('Starting main finished.');

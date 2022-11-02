@@ -30,27 +30,27 @@ export class Skybox {
     const faceInfos = [
       {
         target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-        url: './skybox-images/pos-x.jpg',
+        url: 'pos-x.jpg',
       },
       {
         target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-        url: './skybox-images/neg-x.jpg',
+        url: 'neg-x.jpg',
       },
       {
         target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-        url: './skybox-images/pos-y.jpg',
+        url: 'pos-y.jpg',
       },
       {
         target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-        url: './skybox-images/neg-y.jpg',
+        url: 'neg-y.jpg',
       },
       {
         target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-        url: './skybox-images/pos-z.jpg',
+        url: 'pos-z.jpg',
       },
       {
         target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-        url: './skybox-images/neg-z.jpg',
+        url: 'neg-z.jpg',
       },
     ];
     faceInfos.forEach((faceInfo) => {
@@ -59,8 +59,8 @@ export class Skybox {
       // Upload the canvas to the cubemap face.
       const level = 0;
       const internalFormat = gl.RGBA;
-      const width = 512;
-      const height = 512;
+      const width = 2048;
+      const height = 2048;
       const format = gl.RGBA;
       const type = gl.UNSIGNED_BYTE;
 
@@ -69,7 +69,7 @@ export class Skybox {
 
       // Asynchronously load an image
       const image = new Image();
-      image.src = '../sky-box/' + url;
+      image.src = './skybox/blue-stars/' + url;
       image.addEventListener('load', function () {
         // Now that the image has loaded make copy it to the texture.
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
