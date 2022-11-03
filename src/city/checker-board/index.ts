@@ -35,7 +35,7 @@ export class CheckerBoard {
       1, 0, 1, // right front
     ];
 
-    scaleVertexData(vertexData, [100, 0, 100]);
+    scaleVertexData(vertexData, [10, 0, 10]);
 
     const normalData = repeat(6, [0, 1, 0]);
 
