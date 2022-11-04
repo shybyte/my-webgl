@@ -2,6 +2,7 @@ import { createMyBuffer, createProgram, MyBuffer, randomColor, setProgramAttribu
 import { mat4 } from 'gl-matrix';
 import { CUBE_FRAGMENT_SHADER_SRC, CUBE_VERTEX_SHADER_SRC } from './shader';
 import { cubeNormalData, cubeVertexData } from './cube';
+import { CUBE_PICKING_FRAGMENT_SHADER_SRC, CUBE_PICKING_VERTEX_SHADER_SRC } from './shader-picking';
 
 const CUBE_COUNT = 500;
 
@@ -19,6 +20,7 @@ export class Cubes {
   private colorBuffer: MyBuffer;
 
   private program: WebGLProgram;
+  private programPicking: WebGLProgram;
 
   private uniformLocations: UniformLocations;
 
@@ -71,6 +73,12 @@ export class Cubes {
       projection: gl.getUniformLocation(this.program, 'projection')!,
       modelview: gl.getUniformLocation(this.program, `modelview`)!,
     };
+
+    this.programPicking = createProgram(gl, CUBE_PICKING_VERTEX_SHADER_SRC, CUBE_PICKING_FRAGMENT_SHADER_SRC);
+    const offsetLocation2 = gl.getAttribLocation(this.programPicking, 'aOffset');
+    const aScaleLocation2 = gl.getAttribLocation(this.programPicking, 'aScale');
+    gl.vertexAttribDivisor(offsetLocation2, 1);
+    gl.vertexAttribDivisor(aScaleLocation2, 1);
   }
 
   render(gl: WebGL2RenderingContext, viewMatrix: mat4, projectionMatrix: mat4) {
@@ -89,6 +97,21 @@ export class Cubes {
     gl.uniformMatrix4fv(this.uniformLocations.projection, false, projectionMatrix);
     gl.uniformMatrix4fv(this.uniformLocations.modelview, false, this.mvMatrix);
     gl.uniformMatrix4fv(this.uniformLocations.normalMatrix, false, this.normalMatrix);
+
+    gl.drawArraysInstanced(gl.TRIANGLES, 0, this.positionBuffer.length, CUBE_COUNT);
+  }
+
+  renderPicking(gl: WebGL2RenderingContext, viewMatrix: mat4, projectionMatrix: mat4) {
+    gl.useProgram(this.programPicking);
+
+    setProgramAttributeToMyBuffer(gl, this.programPicking, 'position', this.positionBuffer);
+    setProgramAttributeToMyBuffer(gl, this.programPicking, 'aOffset', this.offsetBuffer);
+    setProgramAttributeToMyBuffer(gl, this.programPicking, 'aScale', this.scaleBuffer);
+
+    mat4.multiply(this.mvMatrix, viewMatrix, this.modelMatrix);
+
+    gl.uniformMatrix4fv(gl.getUniformLocation(this.programPicking, 'projection'), false, projectionMatrix);
+    gl.uniformMatrix4fv(gl.getUniformLocation(this.programPicking, `modelview`), false, this.mvMatrix);
 
     gl.drawArraysInstanced(gl.TRIANGLES, 0, this.positionBuffer.length, CUBE_COUNT);
   }

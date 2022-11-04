@@ -3,9 +3,9 @@ export const CUBE_VERTEX_SHADER_SRC = `#version 300 es
 precision mediump float;
 
 in vec3 position;
-in vec3 color;
 in vec3 aOffset;
 in vec3 aScale;
+in vec3 color;
 in vec3 normal;
 
 out vec3 vColor;
