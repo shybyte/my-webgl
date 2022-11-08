@@ -70,7 +70,9 @@ export function main() {
     const id = data[0] + (data[1] << 8) + (data[2] << 16);
 
     if (id) {
-      console.log('id:', id);
+      cubes.setSelectedInstanceId(id - 1);
+    } else {
+      cubes.setSelectedInstanceId(-1);
     }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);

@@ -10,6 +10,7 @@ in vec3 normal;
 
 out vec3 vColor;
 
+uniform int selectedInstanceId;
 uniform mat4 projection, modelview;
 uniform mat4 normalMatrix;
 
@@ -17,7 +18,7 @@ out vec3 normalInterp;
 out vec3 vertPos;
 
 void main() {
-  vColor = color;
+  vColor = selectedInstanceId == gl_InstanceID ? vec3(1.0,1.0,1.0) : color;
   vec4 vertPos4 = modelview * vec4(position * aScale + aOffset, 1.0);
   vertPos = vec3(vertPos4) / vertPos4.w;
   normalInterp = vec3(normalMatrix * vec4(normal, 0.0));

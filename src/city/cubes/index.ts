@@ -1,4 +1,4 @@
-import { createMyBuffer, createProgram, MyBuffer, randomColor, setProgramAttributeToMyBuffer } from '../../my-utils';
+import { createMyBuffer, createProgram, MyBuffer, setProgramAttributeToMyBuffer } from '../../my-utils';
 import { mat4 } from 'gl-matrix';
 import { CUBE_FRAGMENT_SHADER_SRC, CUBE_VERTEX_SHADER_SRC } from './shader';
 import { cubeNormalData, cubeVertexData } from './cube';
@@ -10,6 +10,7 @@ interface UniformLocations {
   normalMatrix: WebGLUniformLocation;
   projection: WebGLUniformLocation;
   modelview: WebGLUniformLocation;
+  selectedInstanceId: WebGLUniformLocation;
 }
 
 export class Cubes {
@@ -27,6 +28,8 @@ export class Cubes {
   private modelMatrix = mat4.create();
   private mvMatrix = mat4.create();
   private normalMatrix = mat4.create();
+
+  private selectedInstanceId = -1;
 
   constructor(gl: WebGL2RenderingContext) {
     const scaleData = [];
@@ -49,7 +52,7 @@ export class Cubes {
 
     const colorData = [1, 0, 0];
     for (let i = 0; i < CUBE_COUNT - 1; i++) {
-      colorData.push(...randomColor());
+      colorData.push(Math.random(), Math.random(), 0);
     }
 
     this.positionBuffer = createMyBuffer(gl, cubeVertexData);
@@ -72,6 +75,7 @@ export class Cubes {
       normalMatrix: gl.getUniformLocation(this.program, `normalMatrix`)!,
       projection: gl.getUniformLocation(this.program, 'projection')!,
       modelview: gl.getUniformLocation(this.program, `modelview`)!,
+      selectedInstanceId: gl.getUniformLocation(this.program, `selectedInstanceId`)!,
     };
 
     this.programPicking = createProgram(gl, CUBE_PICKING_VERTEX_SHADER_SRC, CUBE_PICKING_FRAGMENT_SHADER_SRC);
@@ -79,6 +83,10 @@ export class Cubes {
     const aScaleLocation2 = gl.getAttribLocation(this.programPicking, 'aScale');
     gl.vertexAttribDivisor(offsetLocation2, 1);
     gl.vertexAttribDivisor(aScaleLocation2, 1);
+  }
+
+  setSelectedInstanceId(instanceId: number) {
+    this.selectedInstanceId = instanceId;
   }
 
   render(gl: WebGL2RenderingContext, viewMatrix: mat4, projectionMatrix: mat4) {
@@ -97,6 +105,7 @@ export class Cubes {
     gl.uniformMatrix4fv(this.uniformLocations.projection, false, projectionMatrix);
     gl.uniformMatrix4fv(this.uniformLocations.modelview, false, this.mvMatrix);
     gl.uniformMatrix4fv(this.uniformLocations.normalMatrix, false, this.normalMatrix);
+    gl.uniform1i(this.uniformLocations.selectedInstanceId, this.selectedInstanceId);
 
     gl.drawArraysInstanced(gl.TRIANGLES, 0, this.positionBuffer.length, CUBE_COUNT);
   }
