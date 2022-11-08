@@ -120,13 +120,15 @@ function main() {
   const objectsToDraw = [];
   const objects = [];
 
-  // Make infos for each object for each object.
-  const numObjects = 200;
-  for (let ii = 0; ii < numObjects; ++ii) {
+  function addObject(
+    ii,
+    shapeId = rand(shapes.length) | 0,
+    translation = [rand(-100, 100), rand(-100, 100), rand(-150, -50)],
+  ) {
     const id = ii + 1;
 
     // pick a shape
-    const shape = shapes[rand(shapes.length) | 0];
+    const shape = shapes[shapeId];
 
     // make an object.
     const object = {
@@ -140,7 +142,7 @@ function main() {
           ((id >> 24) & 0xff) / 0xff,
         ],
       },
-      translation: [rand(-100, 100), rand(-100, 100), rand(-150, -50)],
+      translation: translation,
       xRotationSpeed: rand(0.8, 1.2),
       yRotationSpeed: rand(0.8, 1.2),
     };
@@ -154,6 +156,16 @@ function main() {
       uniforms: object.uniforms,
     });
   }
+
+  // Make infos for each object for each object.
+  const numObjects = 200;
+  // for (let ii = 0; ii < numObjects; ++ii) {
+  //   addObject(ii);
+  // }
+
+  addObject(0, 0, [0, 0, 0]);
+  addObject(1, 0, [0, -5, 10]);
+  addObject(2, 0, [0, 5, -10]);
 
   // Create a texture to render to
   const targetTexture = gl.createTexture();
