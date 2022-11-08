@@ -26,7 +26,7 @@ export function setupPicking(gl: WebGL2RenderingContext): WebGLFramebuffer {
     gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border, format, type, data);
 
     gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, width, height);
   }
 
   // Create and bind the framebuffer
