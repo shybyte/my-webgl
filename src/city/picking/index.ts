@@ -1,5 +1,7 @@
+import { mat4 } from 'gl-matrix';
+
 export class Picker {
-  private frameBuffer: WebGLFramebuffer;
+  private readonly frameBuffer: WebGLFramebuffer;
 
   constructor(private gl: WebGL2RenderingContext) {
     // Create a texture to render to
@@ -47,26 +49,29 @@ export class Picker {
     // make a depth buffer and the same size as the targetTexture
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
 
-    setFramebufferAttachmentSizes(gl.canvas.width, gl.canvas.width);
+    setFramebufferAttachmentSizes(1, 1);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     this.frameBuffer = fb;
   }
 
-  render(mouseX: number, mouseY: number, renderOjects: () => void): number {
+  render(
+    mouseX: number,
+    mouseY: number,
+    perspective: PerspectiveSettings,
+    renderObjects: (singlePixelProjectionMatrix: mat4) => void,
+  ): number {
     const gl = this.gl;
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.frameBuffer);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    renderOjects();
+    renderObjects(create1PixelProjectionMatrix(mouseX, mouseY, perspective, gl));
 
-    const pixelX = (mouseX * gl.canvas.width) / gl.canvas.clientWidth;
-    const pixelY = gl.canvas.height - (mouseY * gl.canvas.height) / gl.canvas.clientHeight - 1;
     const data = new Uint8Array(4);
     gl.readPixels(
-      pixelX, // x
-      pixelY, // y
+      0, // x
+      0, // y
       1, // width
       1, // height
       gl.RGBA, // format
@@ -83,4 +88,47 @@ export class Picker {
       return -1;
     }
   }
+}
+
+export interface PerspectiveSettings {
+  fieldOfViewRadians: number;
+  near: number;
+  far: number;
+}
+
+function create1PixelProjectionMatrix(
+  mouseX: number,
+  mouseY: number,
+  perspective: PerspectiveSettings,
+  gl: WebGL2RenderingContext,
+) {
+  // compute the rectangle the near plane of our frustum covers
+  const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+  const top = Math.tan(perspective.fieldOfViewRadians * 0.5) * perspective.near;
+  const bottom = -top;
+  const left = aspect * bottom;
+  const right = aspect * top;
+  const width = Math.abs(right - left);
+  const height = Math.abs(top - bottom);
+
+  // compute the portion of the near plane covers the 1 pixel
+  // under the mouse.
+  const pixelX = (mouseX * gl.canvas.width) / gl.canvas.clientWidth;
+  const pixelY = gl.canvas.height - (mouseY * gl.canvas.height) / gl.canvas.clientHeight - 1;
+
+  const subLeft = left + (pixelX * width) / gl.canvas.width;
+  const subBottom = bottom + (pixelY * height) / gl.canvas.height;
+  const subWidth = width / gl.canvas.width;
+  const subHeight = height / gl.canvas.height;
+
+  // make a frustum for that 1 pixel
+  return mat4.frustum(
+    mat4.create(),
+    subLeft,
+    subLeft + subWidth,
+    subBottom,
+    subBottom + subHeight,
+    perspective.near,
+    perspective.far,
+  );
 }

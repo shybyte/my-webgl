@@ -22,13 +22,19 @@ export function main() {
     mouseY = e.clientY - rect.top;
   });
 
+  const perspectiveSettings = {
+    fieldOfViewRadians: (75 * Math.PI) / 180, //vertical field of view (angle, radians);
+    near: 1e-4, // near cull distance
+    far: 1e4, // far cull distance
+  };
+
   const projectionMatrix = mat4.create();
   mat4.perspective(
     projectionMatrix,
-    (75 * Math.PI) / 180, //vertical field of view (angle, radians)
+    perspectiveSettings.fieldOfViewRadians,
     canvas.width / canvas.height, // apsect ratio W/H
-    1e-4, // near cull distance
-    1e4, // far cull distance
+    perspectiveSettings.near,
+    perspectiveSettings.far,
   );
 
   const viewMatrix = mat4.lookAt(mat4.create(), [0, 2, 5], [0, 0, 0], [0, 1, 0]);
@@ -50,8 +56,8 @@ export function main() {
     mat4.rotateX(viewMatrixRotated, viewMatrix, mouseController.phi);
     mat4.rotateY(viewMatrixRotated, viewMatrixRotated, mouseController.theta);
 
-    const pickedId = picker.render(mouseX, mouseY, () => {
-      cubes.renderPicking(gl, viewMatrixRotated, projectionMatrix);
+    const pickedId = picker.render(mouseX, mouseY, perspectiveSettings, (singlePixelProjectionMatrix) => {
+      cubes.renderPicking(gl, viewMatrixRotated, singlePixelProjectionMatrix);
     });
     cubes.setSelectedInstanceId(pickedId);
 
