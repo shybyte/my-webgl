@@ -4,7 +4,7 @@ import { CUBE_FRAGMENT_SHADER_SRC, CUBE_VERTEX_SHADER_SRC } from './shader';
 import { cubeNormalData, cubeVertexData } from './cube';
 import { CUBE_PICKING_FRAGMENT_SHADER_SRC, CUBE_PICKING_VERTEX_SHADER_SRC } from './shader-picking';
 
-const CUBE_COUNT = 500;
+const CUBE_COUNT = 50_000;
 
 interface UniformLocations {
   normalMatrix: WebGLUniformLocation;
