@@ -4,8 +4,11 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
+    "dev:city": "vite src/city",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build:city": "vite build src/city",
+    "preview": "vite preview",
+    "preview:city": "vite preview src/city"
   },
   "dependencies": {
     "gl-matrix": "^3.4.3",
