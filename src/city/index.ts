@@ -48,7 +48,7 @@ export function main() {
 
   renderLoop((_deltaTime, fps, frameCount) => {
     if (frameCount % 10 === 5) {
-      infoDisplayElement.innerText = 'FPS: ' + fps;
+      infoDisplayElement.textContent = 'FPS: ' + fps;
     }
 
     mouseController.onRenderLoop();
