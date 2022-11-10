@@ -2,6 +2,8 @@ import { mat4 } from 'gl-matrix';
 
 export class Picker {
   private readonly frameBuffer: WebGLFramebuffer;
+  private readonly pixelData = new Uint8Array(4);
+  private readonly singlePixelProjectionMatrix = mat4.create();
 
   constructor(private gl: WebGL2RenderingContext) {
     // Create a texture to render to
@@ -66,9 +68,9 @@ export class Picker {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.frameBuffer);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    renderObjects(create1PixelProjectionMatrix(mouseX, mouseY, perspective, gl));
+    create1PixelProjectionMatrix(mouseX, mouseY, perspective, gl, this.singlePixelProjectionMatrix);
+    renderObjects(this.singlePixelProjectionMatrix);
 
-    const data = new Uint8Array(4);
     gl.readPixels(
       0, // x
       0, // y
@@ -76,9 +78,9 @@ export class Picker {
       1, // height
       gl.RGBA, // format
       gl.UNSIGNED_BYTE, // type
-      data,
+      this.pixelData,
     ); // typed array to hold result
-    const id = data[0] + (data[1] << 8) + (data[2] << 16);
+    const id = this.pixelData[0] + (this.pixelData[1] << 8) + (this.pixelData[2] << 16);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -101,6 +103,7 @@ function create1PixelProjectionMatrix(
   mouseY: number,
   perspective: PerspectiveSettings,
   gl: WebGL2RenderingContext,
+  output: mat4,
 ) {
   // compute the rectangle the near plane of our frustum covers
   const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -122,8 +125,8 @@ function create1PixelProjectionMatrix(
   const subHeight = height / gl.canvas.height;
 
   // make a frustum for that 1 pixel
-  return mat4.frustum(
-    mat4.create(),
+  mat4.frustum(
+    output,
     subLeft,
     subLeft + subWidth,
     subBottom,
