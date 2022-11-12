@@ -9,6 +9,11 @@ export class MouseController {
   #phi = 0;
   #zoom = 1;
 
+  private moveDX = 0;
+  private moveDY = 0;
+  #moveX = 0;
+  #moveY = 0;
+
   constructor(canvas: HTMLCanvasElement) {
     let x_prev = 0;
     let y_prev = 0;
@@ -27,10 +32,19 @@ export class MouseController {
 
     const mouseMove = (e: MouseEvent): any => {
       if (!this.drag) return false;
-      this.dX = ((e.pageX - x_prev) * Math.PI) / canvas.width;
-      this.dY = ((e.pageY - y_prev) * Math.PI) / canvas.height;
-      this.#theta += this.dX;
-      this.#phi += this.dY;
+
+      if (e.buttons === 1) {
+        this.dX = ((e.pageX - x_prev) * Math.PI) / canvas.width;
+        this.dY = ((e.pageY - y_prev) * Math.PI) / canvas.height;
+        this.#theta += this.dX;
+        this.#phi += this.dY;
+      } else if (e.buttons === 2) {
+        this.moveDX = ((e.pageX - x_prev) / canvas.width) * 10;
+        this.moveDY = ((e.pageY - y_prev) / canvas.height) * 10;
+        this.#moveX += this.moveDX;
+        this.#moveY += this.moveDY;
+      }
+
       x_prev = e.pageX;
       y_prev = e.pageY;
       e.preventDefault();
@@ -43,6 +57,10 @@ export class MouseController {
 
     addEventListener('wheel', (event) => {
       this.dZoom -= event.deltaY / 20_000;
+    });
+
+    addEventListener('contextmenu', (e) => {
+      e.preventDefault();
     });
   }
 
@@ -58,14 +76,25 @@ export class MouseController {
     return this.#zoom;
   }
 
+  get moveY(): number {
+    return this.#moveY;
+  }
+  get moveX(): number {
+    return this.#moveX;
+  }
+
   onRenderLoop() {
     if (!this.drag) {
       this.dX *= AMORTIZATION;
       this.dY *= AMORTIZATION;
       this.dZoom *= AMORTIZATION;
+      this.moveDX *= AMORTIZATION;
+      this.moveDY *= AMORTIZATION;
       this.#theta += this.dX;
       this.#phi += this.dY;
       this.#zoom = Math.max(this.#zoom + this.dZoom, 0.1);
+      this.#moveX += this.moveDX;
+      this.#moveY += this.moveDY;
     }
   }
 }

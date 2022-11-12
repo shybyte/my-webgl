@@ -58,9 +58,11 @@ export function main() {
 
     mouseController.onRenderLoop();
 
-    mat4.scale(finalViewMatrix, viewMatrix, [mouseController.zoom, mouseController.zoom, mouseController.zoom]);
+    mat4.copy(finalViewMatrix, viewMatrix);
+    mat4.translate(finalViewMatrix, finalViewMatrix, [mouseController.moveX, 0.0, mouseController.moveY]);
     mat4.rotateX(finalViewMatrix, finalViewMatrix, mouseController.phi);
     mat4.rotateY(finalViewMatrix, finalViewMatrix, mouseController.theta);
+    mat4.scale(finalViewMatrix, finalViewMatrix, [mouseController.zoom, mouseController.zoom, mouseController.zoom]);
 
     const pickedId = picker.render(mouseX, mouseY, perspectiveSettings, (singlePixelProjectionMatrix) => {
       cubes.renderPicking(gl, finalViewMatrix, singlePixelProjectionMatrix);
