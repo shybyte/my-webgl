@@ -5,6 +5,8 @@ import { Cubes } from './cubes';
 import { MouseController } from './mouse-controller';
 import { Skybox } from './skybox';
 import { Picker } from './picking';
+import { FrameBufferRenderer } from './post-effects/frame-buffer-renderer';
+import { FrameBuffer } from './utils/frame-buffer';
 
 export function main() {
   console.log('Starting main...');
@@ -46,6 +48,9 @@ export function main() {
   const mouseController = new MouseController(canvas);
   const skybox = new Skybox(gl);
 
+  const frameBuffer = new FrameBuffer(gl);
+  const frameBufferRenderer = new FrameBufferRenderer(gl);
+
   renderLoop((_deltaTime, fps, frameCount) => {
     if (frameCount % 10 === 5) {
       infoDisplayElement.textContent = 'FPS: ' + fps;
@@ -61,9 +66,14 @@ export function main() {
     });
     cubes.setSelectedInstanceId(pickedId);
 
-    checkerBoard.render(gl, viewMatrixRotated, projectionMatrix);
-    cubes.render(gl, viewMatrixRotated, projectionMatrix);
-    skybox.render(gl, viewMatrixRotated, projectionMatrix);
+    frameBuffer.bind(() => {
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      checkerBoard.render(gl, viewMatrixRotated, projectionMatrix);
+      cubes.render(gl, viewMatrixRotated, projectionMatrix);
+      skybox.render(gl, viewMatrixRotated, projectionMatrix);
+    });
+
+    frameBufferRenderer.render(frameBuffer);
   });
 
   console.log('Starting main finished.');

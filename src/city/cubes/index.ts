@@ -64,13 +64,6 @@ export class Cubes {
 
     this.program = createProgram(gl, CUBE_VERTEX_SHADER_SRC, CUBE_FRAGMENT_SHADER_SRC);
 
-    const offsetLocation = gl.getAttribLocation(this.program, 'aOffset');
-    const aScaleLocation = gl.getAttribLocation(this.program, 'aScale');
-    const colorLocation = gl.getAttribLocation(this.program, 'color');
-    gl.vertexAttribDivisor(offsetLocation, 1);
-    gl.vertexAttribDivisor(aScaleLocation, 1);
-    gl.vertexAttribDivisor(colorLocation, 1);
-
     this.uniformLocations = {
       normalMatrix: gl.getUniformLocation(this.program, `normalMatrix`)!,
       projection: gl.getUniformLocation(this.program, 'projection')!,
@@ -79,10 +72,6 @@ export class Cubes {
     };
 
     this.programPicking = createProgram(gl, CUBE_PICKING_VERTEX_SHADER_SRC, CUBE_PICKING_FRAGMENT_SHADER_SRC);
-    const offsetLocation2 = gl.getAttribLocation(this.programPicking, 'aOffset');
-    const aScaleLocation2 = gl.getAttribLocation(this.programPicking, 'aScale');
-    gl.vertexAttribDivisor(offsetLocation2, 1);
-    gl.vertexAttribDivisor(aScaleLocation2, 1);
   }
 
   setSelectedInstanceId(instanceId: number) {
@@ -91,6 +80,13 @@ export class Cubes {
 
   render(gl: WebGL2RenderingContext, viewMatrix: mat4, projectionMatrix: mat4) {
     gl.useProgram(this.program);
+
+    const offsetLocation = gl.getAttribLocation(this.program, 'aOffset');
+    const aScaleLocation = gl.getAttribLocation(this.program, 'aScale');
+    const colorLocation = gl.getAttribLocation(this.program, 'color');
+    gl.vertexAttribDivisor(offsetLocation, 1);
+    gl.vertexAttribDivisor(aScaleLocation, 1);
+    gl.vertexAttribDivisor(colorLocation, 1);
 
     setProgramAttributeToMyBuffer(gl, this.program, 'position', this.positionBuffer);
     setProgramAttributeToMyBuffer(gl, this.program, 'normal', this.normalBuffer);
@@ -112,6 +108,11 @@ export class Cubes {
 
   renderPicking(gl: WebGL2RenderingContext, viewMatrix: mat4, projectionMatrix: mat4) {
     gl.useProgram(this.programPicking);
+
+    const offsetLocation2 = gl.getAttribLocation(this.programPicking, 'aOffset');
+    const aScaleLocation2 = gl.getAttribLocation(this.programPicking, 'aScale');
+    gl.vertexAttribDivisor(offsetLocation2, 1);
+    gl.vertexAttribDivisor(aScaleLocation2, 1);
 
     setProgramAttributeToMyBuffer(gl, this.programPicking, 'position', this.positionBuffer);
     setProgramAttributeToMyBuffer(gl, this.programPicking, 'aOffset', this.offsetBuffer);
