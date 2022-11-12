@@ -4,8 +4,10 @@ export class MouseController {
   private drag = false;
   private dX = 0;
   private dY = 0;
+  private dZoom = 0;
   #theta = 0;
   #phi = 0;
+  #zoom = 1;
 
   constructor(canvas: HTMLCanvasElement) {
     let x_prev = 0;
@@ -38,6 +40,10 @@ export class MouseController {
     canvas.addEventListener('mouseup', mouseUp, false);
     canvas.addEventListener('mouseout', mouseUp, false);
     canvas.addEventListener('mousemove', mouseMove, false);
+
+    addEventListener('wheel', (event) => {
+      this.dZoom -= event.deltaY / 20_000;
+    });
   }
 
   get phi(): number {
@@ -48,12 +54,18 @@ export class MouseController {
     return this.#theta;
   }
 
+  get zoom(): number {
+    return this.#zoom;
+  }
+
   onRenderLoop() {
     if (!this.drag) {
       this.dX *= AMORTIZATION;
       this.dY *= AMORTIZATION;
+      this.dZoom *= AMORTIZATION;
       this.#theta += this.dX;
       this.#phi += this.dY;
+      this.#zoom = Math.max(this.#zoom + this.dZoom, 0.1);
     }
   }
 }

@@ -40,7 +40,7 @@ export function main() {
   );
 
   const viewMatrix = mat4.lookAt(mat4.create(), [0, 2, 5], [0, 0, 0], [0, 1, 0]);
-  const viewMatrixRotated = mat4.create();
+  const finalViewMatrix = mat4.create();
 
   const picker = new Picker(gl);
   const checkerBoard = new CheckerBoard(gl);
@@ -58,19 +58,20 @@ export function main() {
 
     mouseController.onRenderLoop();
 
-    mat4.rotateX(viewMatrixRotated, viewMatrix, mouseController.phi);
-    mat4.rotateY(viewMatrixRotated, viewMatrixRotated, mouseController.theta);
+    mat4.scale(finalViewMatrix, viewMatrix, [mouseController.zoom, mouseController.zoom, mouseController.zoom]);
+    mat4.rotateX(finalViewMatrix, finalViewMatrix, mouseController.phi);
+    mat4.rotateY(finalViewMatrix, finalViewMatrix, mouseController.theta);
 
     const pickedId = picker.render(mouseX, mouseY, perspectiveSettings, (singlePixelProjectionMatrix) => {
-      cubes.renderPicking(gl, viewMatrixRotated, singlePixelProjectionMatrix);
+      cubes.renderPicking(gl, finalViewMatrix, singlePixelProjectionMatrix);
     });
     cubes.setSelectedInstanceId(pickedId);
 
     frameBuffer.bind(() => {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      checkerBoard.render(gl, viewMatrixRotated, projectionMatrix);
-      cubes.render(gl, viewMatrixRotated, projectionMatrix);
-      skybox.render(gl, viewMatrixRotated, projectionMatrix);
+      checkerBoard.render(gl, finalViewMatrix, projectionMatrix);
+      cubes.render(gl, finalViewMatrix, projectionMatrix);
+      skybox.render(gl, finalViewMatrix, projectionMatrix);
     });
 
     frameBufferRenderer.render(frameBuffer);
