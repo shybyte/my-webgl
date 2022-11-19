@@ -2,7 +2,12 @@ export class FrameBuffer {
   private readonly frameBuffer: WebGLFramebuffer;
   public readonly targetTexture: WebGLTexture;
 
-  constructor(private gl: WebGL2RenderingContext, width = gl.canvas.width, height = gl.canvas.height) {
+  constructor(
+    private gl: WebGL2RenderingContext,
+    createDepthBuffer: boolean,
+    width = gl.canvas.width,
+    height = gl.canvas.height,
+  ) {
     // Create a texture to render to
     this.targetTexture = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, this.targetTexture);
@@ -11,12 +16,14 @@ export class FrameBuffer {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
     // create a depth renderbuffer
-    const depthBuffer = gl.createRenderbuffer();
-    if (!depthBuffer) {
+    const depthBuffer = createDepthBuffer && gl.createRenderbuffer();
+    if (createDepthBuffer && !depthBuffer) {
       throw new Error('Can not createRenderbuffer');
     }
 
-    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+    if (createDepthBuffer) {
+      gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+    }
 
     const setFramebufferAttachmentSizes = (width: number, height: number) => {
       gl.bindTexture(gl.TEXTURE_2D, this.targetTexture);
@@ -29,8 +36,10 @@ export class FrameBuffer {
       const data = null;
       gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border, format, type, data);
 
-      gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, width, height);
+      if (createDepthBuffer) {
+        gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, width, height);
+      }
     };
 
     // Create and bind the framebuffer
@@ -46,7 +55,9 @@ export class FrameBuffer {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, this.targetTexture, level);
 
     // make a depth buffer and the same size as the targetTexture
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+    if (createDepthBuffer) {
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+    }
 
     setFramebufferAttachmentSizes(width, height);
 
