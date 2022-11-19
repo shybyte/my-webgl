@@ -5,7 +5,13 @@ import { Cubes } from './cubes';
 import { MouseController } from './mouse-controller';
 import { Skybox } from './skybox';
 import { Picker } from './picking';
-import { FrameBufferRenderer } from './post-effects/frame-buffer-renderer';
+import {
+  FRAGMENT_SHADER_BLUR_HORIZONTAL_SRC,
+  FRAGMENT_SHADER_BLUR_VERTICAL_SRC,
+  FRAGMENT_SHADER_BRIGHTEN_SRC,
+  FRAGMENT_SHADER_COPY_SRC,
+  FrameBufferRenderer,
+} from './post-effects/frame-buffer-renderer';
 import { FrameBuffer } from './utils/frame-buffer';
 
 export function main() {
@@ -48,8 +54,13 @@ export function main() {
   const mouseController = new MouseController(canvas);
   const skybox = new Skybox(gl);
 
-  const frameBuffer = new FrameBuffer(gl);
-  const frameBufferRenderer = new FrameBufferRenderer(gl);
+  const frameBuffer = new FrameBuffer(gl, true);
+  const frameBuffer2 = new FrameBuffer(gl, false);
+  const frameBuffer3 = new FrameBuffer(gl, false);
+  const copyFrameBufferRenderer = new FrameBufferRenderer(gl, FRAGMENT_SHADER_COPY_SRC);
+  const brightenFrameBufferRenderer = new FrameBufferRenderer(gl, FRAGMENT_SHADER_BRIGHTEN_SRC);
+  const blurHorizontalFrameBufferRenderer = new FrameBufferRenderer(gl, FRAGMENT_SHADER_BLUR_HORIZONTAL_SRC);
+  const blurVerticalFrameBufferRenderer = new FrameBufferRenderer(gl, FRAGMENT_SHADER_BLUR_VERTICAL_SRC);
 
   renderLoop((_deltaTime, fps, frameCount) => {
     if (frameCount % 10 === 5) {
@@ -76,7 +87,19 @@ export function main() {
       skybox.render(gl, finalViewMatrix, projectionMatrix);
     });
 
-    frameBufferRenderer.render(frameBuffer);
+    frameBuffer2.bind(() => {
+      copyFrameBufferRenderer.render(frameBuffer);
+    });
+
+    for (let i = 0; i < 1; i++) {
+      frameBuffer3.bind(() => {
+        blurHorizontalFrameBufferRenderer.render(frameBuffer2);
+      });
+      frameBuffer2.bind(() => {
+        blurVerticalFrameBufferRenderer.render(frameBuffer3);
+      });
+    }
+    brightenFrameBufferRenderer.render(frameBuffer2);
   });
 
   console.log('Starting main finished.');

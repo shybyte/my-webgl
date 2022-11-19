@@ -6,8 +6,8 @@ export class FrameBufferRenderer {
   private readonly positionBuffer: MyBuffer;
   private readonly texCoordBuffer: MyBuffer;
 
-  constructor(private gl: WebGL2RenderingContext) {
-    this.program = createProgram(gl, VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC);
+  constructor(private gl: WebGL2RenderingContext, fragmentShader: string) {
+    this.program = createProgram(gl, VERTEX_SHADER_SRC, fragmentShader);
 
     // prettier-ignore
     this.positionBuffer = createMyBuffer(gl, [
@@ -76,7 +76,28 @@ void main() {
 `;
 
 // language=glsl
-const FRAGMENT_SHADER_SRC = `#version 300 es
+export const FRAGMENT_SHADER_COPY_SRC = `#version 300 es
+
+// fragment shaders don't have a default precision so we need
+// to pick one. highp is a good default. It means "high precision"
+precision highp float;
+
+// our texture
+uniform sampler2D u_image;
+
+// the texCoords passed in from the vertex shader.
+in vec2 v_texCoord;
+
+// we need to declare an output for the fragment shader
+out vec4 outColor;
+
+void main() {
+  outColor = texture(u_image, v_texCoord);
+}
+`;
+
+// language=glsl
+export const FRAGMENT_SHADER_BRIGHTEN_SRC = `#version 300 es
 
 // fragment shaders don't have a default precision so we need
 // to pick one. highp is a good default. It means "high precision"
@@ -93,5 +114,71 @@ out vec4 outColor;
 
 void main() {
   outColor = texture(u_image, v_texCoord) * 2.0;
+}
+`;
+
+// language=glsl
+export const FRAGMENT_SHADER_BLUR_HORIZONTAL_SRC = `#version 300 es
+
+// fragment shaders don't have a default precision so we need
+// to pick one. highp is a good default. It means "high precision"
+precision highp float;
+
+// our texture
+uniform sampler2D u_image;
+
+// the texCoords passed in from the vertex shader.
+in vec2 v_texCoord;
+
+// we need to declare an output for the fragment shader
+out vec4 outColor;
+
+float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
+
+void main()
+{
+  vec2 tex_offset = vec2(1.0, 1.0) / float(textureSize(u_image, 0));// gets size of single texel
+  vec3 result = texture(u_image, v_texCoord).rgb * weight[0];// current fragment's contribution
+
+  for (int i = 1; i < 5; ++i)
+  {
+    result += texture(u_image, v_texCoord + vec2(tex_offset.x * float(i), 0.0)).rgb * weight[i];
+    result += texture(u_image, v_texCoord - vec2(tex_offset.x * float(i), 0.0)).rgb * weight[i];
+  }
+
+  outColor = vec4(result, 1.0);
+}
+`;
+
+// language=glsl
+export const FRAGMENT_SHADER_BLUR_VERTICAL_SRC = `#version 300 es
+
+// fragment shaders don't have a default precision so we need
+// to pick one. highp is a good default. It means "high precision"
+precision highp float;
+
+// our texture
+uniform sampler2D u_image;
+
+// the texCoords passed in from the vertex shader.
+in vec2 v_texCoord;
+
+// we need to declare an output for the fragment shader
+out vec4 outColor;
+
+float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
+
+void main()
+{
+  vec2 tex_offset = vec2(1.0, 1.0) / float(textureSize(u_image, 0));// gets size of single texel
+  vec3 result = texture(u_image, v_texCoord).rgb * weight[0];// current fragment's contribution
+
+  for (int i = 1; i < 5; ++i)
+  {
+    result += texture(u_image, v_texCoord + vec2(tex_offset.y * float(i), 0.0)).rgb * weight[i];
+    result += texture(u_image, v_texCoord - vec2(tex_offset.y * float(i), 0.0)).rgb * weight[i];
+  }
+
+  outColor = vec4(result, 1.0);
 }
 `;
