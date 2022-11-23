@@ -27,6 +27,6 @@ void main()
   sum += texture(u_image, uv + vec2(halfpixel.x, -halfpixel.y) * offset);
   sum += texture(u_image, uv - vec2(halfpixel.x, -halfpixel.y) * offset);
 
-  outColor = sum / 4.0;
+  outColor = sum / 8.0;
 }
 `;
