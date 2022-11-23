@@ -7,7 +7,7 @@ import { Skybox } from './skybox';
 import { Picker } from './picking';
 import { FRAGMENT_SHADER_COPY_SRC, FrameBufferRenderer } from './post-effects/frame-buffer-renderer';
 import { FrameBuffer } from './utils/frame-buffer';
-import { FRAGMENT_SHADER_DOWN_SAMPLE_SRC } from './post-effects/dual-kawase-blur';
+import { FRAGMENT_SHADER_DOWN_SAMPLE_SRC, FRAGMENT_SHADER_UP_SAMPLE_SRC } from './post-effects/dual-kawase-blur';
 
 export function main() {
   console.log('Starting main...');
@@ -53,7 +53,9 @@ export function main() {
   const frameBuffer2 = new FrameBuffer(gl, false);
   const frameBuffer3 = new FrameBuffer(gl, false);
   const copyFrameBufferRenderer = new FrameBufferRenderer(gl, FRAGMENT_SHADER_COPY_SRC);
+
   const downSampleBufferRenderer = new FrameBufferRenderer(gl, FRAGMENT_SHADER_DOWN_SAMPLE_SRC);
+  const upSampleBufferRenderer = new FrameBufferRenderer(gl, FRAGMENT_SHADER_UP_SAMPLE_SRC);
 
   renderLoop((_deltaTime, fps, frameCount) => {
     if (frameCount % 10 === 5) {
@@ -85,6 +87,13 @@ export function main() {
     });
     frameBuffer3.bind(() => {
       downSampleBufferRenderer.render(frameBuffer2);
+    });
+
+    frameBuffer2.bind(() => {
+      upSampleBufferRenderer.render(frameBuffer3);
+    });
+    frameBuffer3.bind(() => {
+      upSampleBufferRenderer.render(frameBuffer2);
     });
 
     copyFrameBufferRenderer.render(frameBuffer3);
